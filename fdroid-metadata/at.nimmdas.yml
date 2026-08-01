@@ -3,8 +3,7 @@
 # This file is NOT used by the app build. Copy it to metadata/at.nimmdas.yml in a fork of
 # https://gitlab.com/fdroid/fdroiddata and open a merge request from there.
 #
-# Before submitting, replace GITHUB_USER with the account that hosts the repository and
-# fill in `commit:` with the tag created for the release.
+# Before submitting, make sure the tag named in `commit:` exists in the repository.
 
 Categories:
   - Money
@@ -15,14 +14,14 @@ License: GPL-3.0-or-later
 AuthorName: Nimmdas
 AuthorWebSite: https://nimmdas.at
 
-SourceCode: https://github.com/GITHUB_USER/nimmdas-android
-IssueTracker: https://github.com/GITHUB_USER/nimmdas-android/issues
-Changelog: https://github.com/GITHUB_USER/nimmdas-android/releases
+SourceCode: https://github.com/Echo-Files/nimmdas-android
+IssueTracker: https://github.com/Echo-Files/nimmdas-android/issues
+Changelog: https://github.com/Echo-Files/nimmdas-android/releases
 
 AutoName: Nimmdas
 
 RepoType: git
-Repo: https://github.com/GITHUB_USER/nimmdas-android.git
+Repo: https://github.com/Echo-Files/nimmdas-android.git
 
 Builds:
   - versionName: 2.1.0
