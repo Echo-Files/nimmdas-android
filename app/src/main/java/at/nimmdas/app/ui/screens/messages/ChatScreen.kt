@@ -369,7 +369,11 @@ fun ChatScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().imePadding(),
+        // union, not imePadding().navigationBarsPadding(): the two would stack and leave
+        // a gap above the keyboard. The IME inset already covers the navigation bar.
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)),
         topBar = {
             Surface(tonalElevation = 2.dp, shadowElevation = 2.dp) {
                 Row(

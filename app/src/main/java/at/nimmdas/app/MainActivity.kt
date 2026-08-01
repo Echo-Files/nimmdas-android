@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,7 +57,12 @@ class MainActivity : ComponentActivity() {
             )
         }
         
-        enableEdgeToEdge()
+        // Transparent system bars — the default draws an opaque scrim behind the
+        // navigation bar, which shows up as a white strip below the nav capsule.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+        )
 
         // Check if launched from deep link
         val initialRoute = handleIntentForRoute(intent)

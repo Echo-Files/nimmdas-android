@@ -6,6 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -61,6 +65,12 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
     val isLoading = _isLoading.asStateFlow()
     private val _totalResults = MutableStateFlow(0)
     val totalResults = _totalResults.asStateFlow()
+    /** Endless scrolling — page currently loaded, and whether another one exists. */
+    private val _page = MutableStateFlow(1)
+    private val _hasMore = MutableStateFlow(false)
+    val hasMore = _hasMore.asStateFlow()
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore = _isLoadingMore.asStateFlow()
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
     private val _selectedCategory = MutableStateFlow<String?>(null)
@@ -243,9 +253,32 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Loads page 1 and replaces the result list. */
     fun search() {
-        viewModelScope.launch {
-            _isLoading.value = true
+        // A running append must not overwrite the fresh page-1 result.
+        loadMoreJob?.cancel()
+        _isLoadingMore.value = false
+        _isLoading.value = true
+        runSearch(page = 1)
+    }
+
+    /**
+     * Appends the next page. Ignored while a request is running or once the last page
+     * has been reached.
+     *
+     * The flag is raised here, not inside the coroutine — a scroll calls this on every
+     * frame, and an asynchronous guard would let dozens of requests through before the
+     * first one flipped it.
+     */
+    fun loadMore() {
+        if (_isLoading.value || _isLoadingMore.value || !_hasMore.value) return
+        _isLoadingMore.value = true
+        loadMoreJob = runSearch(page = _page.value + 1)
+    }
+
+    private var loadMoreJob: kotlinx.coroutines.Job? = null
+
+    private fun runSearch(page: Int) = viewModelScope.launch {
             try {
                 val f = _filters.value
                 val response = apiClient.api.search(
@@ -280,21 +313,31 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
                     collectType = f["collectType"], rarity = f["rarity"], era = f["era"],
                     widthMax = f["widthMax"], heightMax = f["heightMax"],
                     gartenType = f["gartenType"],
-                    limit = 30
+                    page = page,
+                    limit = PAGE_SIZE,
                 )
                 if (response.isSuccessful) {
-                    _results.value = response.body()?.listings ?: emptyList()
-                    _totalResults.value = response.body()?.total ?: 0
+                    val body = response.body()
+                    val fresh = body?.listings ?: emptyList()
+                    // Guard against duplicates: a listing bumped between two page loads
+                    // shifts the server-side window and can repeat an entry.
+                    _results.value = if (page == 1) fresh else {
+                        val seen = _results.value.mapTo(HashSet()) { it.id }
+                        _results.value + fresh.filter { seen.add(it.id) }
+                    }
+                    _totalResults.value = body?.total ?: 0
+                    _page.value = page
+                    _hasMore.value = page < (body?.totalPages ?: 1) && fresh.isNotEmpty()
                     _error.value = null
-                } else {
+                } else if (page == 1) {
                     _error.value = "Suche fehlgeschlagen (${response.code()})"
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _error.value = "Keine Verbindung zum Server"
+                if (page == 1) _error.value = "Keine Verbindung zum Server"
             }
-            _isLoading.value = false
-        }
+        _isLoading.value = false
+        _isLoadingMore.value = false
     }
 
     fun createSavedSearch(name: String, onResult: (Boolean) -> Unit = {}) {
@@ -323,6 +366,42 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
+/** Results fetched per page while scrolling. The server caps this at 50. */
+private const val PAGE_SIZE = 30
+
+/** How many items before the end the next page starts loading. */
+private const val LOAD_MORE_THRESHOLD = 6
+
+/**
+ * Watches a lazy list and asks for the next page shortly before the end is reached.
+ * snapshotFlow keeps this off the composition — it only reacts to actual scrolls.
+ */
+@Composable
+private fun InfiniteScroll(
+    lastVisible: () -> Int?,
+    total: Int,
+    onLoadMore: () -> Unit,
+) {
+    LaunchedEffect(total) {
+        snapshotFlow { lastVisible() }
+            .distinctUntilChanged()
+            .collect { index ->
+                if (index != null && total > 0 && index >= total - LOAD_MORE_THRESHOLD) onLoadMore()
+            }
+    }
+}
+
+/** Spinner shown at the end of the list while the next page is on its way. */
+@Composable
+private fun LoadMoreFooter() {
+    Box(
+        Modifier.fillMaxWidth().padding(vertical = 20.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(Modifier.size(26.dp), strokeWidth = 2.5.dp, color = Color(0xFF00BC7D))
+    }
+}
+
 val CATEGORIES = listOf(
     "all" to "🔥 Alle", "Flohmarkt" to "🛍️ Flohmarkt", "Autos" to "🚗 Autos",
     "Immobilien" to "🏠 Immobilien", "Jobs" to "💼 Jobs", "Elektronik" to "💻 Elektronik",
@@ -343,6 +422,7 @@ fun SearchScreen(
     val isLoading by searchViewModel.isLoading.collectAsState()
     val query by searchViewModel.query.collectAsState()
     val totalResults by searchViewModel.totalResults.collectAsState()
+    val hasMore by searchViewModel.hasMore.collectAsState()
     val selectedCategory by searchViewModel.selectedCategory.collectAsState()
     val selectedSort by searchViewModel.selectedSort.collectAsState()
     val filters by searchViewModel.filters.collectAsState()
@@ -1013,13 +1093,20 @@ fun SearchScreen(
                 }
             } else if (viewMode == "grid") {
                 // Two tiles per row, like the website's mobile grid.
+                val gridState = rememberLazyGridState()
+                InfiniteScroll(
+                    lastVisible = { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
+                    total = results.size,
+                    onLoadMore = { searchViewModel.loadMore() },
+                )
                 LazyVerticalGrid(
+                    state = gridState,
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(results) { listing ->
+                    items(results, key = { it.id }) { listing ->
                         ListingCard(
                             listing,
                             onClick = { onListingClick(listing.id) },
@@ -1029,16 +1116,32 @@ fun SearchScreen(
                             onToggleSave = { app.watchlist.toggle(listing.id) },
                         )
                     }
+                    if (hasMore) {
+                        item(span = { GridItemSpan(2) }) { LoadMoreFooter() }
+                    }
                 }
             } else {
-                LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(results) { listing ->
+                val listState = rememberLazyListState()
+                InfiniteScroll(
+                    lastVisible = { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
+                    total = results.size,
+                    onLoadMore = { searchViewModel.loadMore() },
+                )
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(results, key = { it.id }) { listing ->
                         ListingCard(
                             listing, onClick = { onListingClick(listing.id) },
                             modifier = Modifier.fillMaxWidth(), viewMode = viewMode,
                             isSaved = listing.id in savedIds,
                             onToggleSave = { app.watchlist.toggle(listing.id) },
                         )
+                    }
+                    if (hasMore) {
+                        item { LoadMoreFooter() }
                     }
                 }
             }

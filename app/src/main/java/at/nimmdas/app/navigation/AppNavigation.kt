@@ -260,6 +260,10 @@ fun AppNavigation(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // The app draws edge to edge, so the capsule has to clear the
+                        // system bar itself — with 3-button navigation that is ~48dp,
+                        // far more than the fixed padding below.
+                        .navigationBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
