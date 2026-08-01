@@ -1,0 +1,7 @@
+Erste Version der neuen, nativen App.
+
+• Preisbewertung auf der Inseratsseite
+• Kartensuche mit Gruppierung
+• Kategorieerkennung beim Inserieren
+• Chat mit Bildern, PDFs, Standort und Preisvorschlägen
+• Suchagenten, Merkliste, Entwürfe und Statistiken

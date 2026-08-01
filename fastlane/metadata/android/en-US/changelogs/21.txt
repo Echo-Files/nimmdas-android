@@ -1,0 +1,7 @@
+First release of the new native app.
+
+• Price evaluation on the listing page
+• Map search with clustering
+• Category detection when creating a listing
+• Chat with images, PDFs, location and price offers
+• Search agents, watchlist, drafts and statistics

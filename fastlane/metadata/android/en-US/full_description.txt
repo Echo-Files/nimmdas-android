@@ -1,15 +1,40 @@
-Nimmdas is an Austrian classifieds marketplace for second-hand goods, cars, real estate, jobs and services.
+Buy and sell in Austria — no selling fees, no commission.
 
-Features:
+Nimmdas is a marketplace for second-hand goods, cars, real estate, jobs and services. A listing goes live in under a minute: type a title, pick your photos, done.
 
-* Search with a map view, radius search and per-category filters
-* Create a listing in a few steps — the category is detected from the title
-* Used-price check: how the asking price compares to current new and market values
-* Chat with images, PDFs, location sharing and price offers
-* Voice calls between buyer and seller
-* Watchlist and search agents
-* Coin system with discounts on listings
 
-This app is a client for the nimmdas.at service. An account there is required; the server side is not open source.
+<b>Know straight away whether the price is fair</b>
 
-Note on the F-Droid build: it contains no Google libraries. Background push notifications are therefore unavailable — new messages and calls show up while the app is open.
+Every listing shows where the asking price sits — between Super Deal and Above New Price. For electronics and everyday items the current new price is used and adjusted for condition; for cars it is the market value of comparable vehicles. Not a gut feeling, a number.
+
+
+<b>Finding instead of searching</b>
+
+The map shows every match at once and groups them into clusters as you zoom out. Plus radius search, per-category filters — year, mileage, floor area, rooms — and search agents that tell you as soon as something matching goes online.
+
+
+<b>List without filling in forms</b>
+
+Type what you are selling. The right category is detected, brand and model are filled in. Whatever is still missing, the app asks for specifically — with suggestions instead of empty fields. Not finished yet? Save as a draft and continue later.
+
+
+<b>Talk to the seller directly</b>
+
+Chat with images, PDFs, location sharing and price offers that can be accepted or declined with one tap. When typing is too slow, call straight from the chat.
+
+
+<b>More</b>
+
+• Watchlist for everything you like
+• Energy certificate and documents for real estate
+• 3D sun path for flats and houses
+• Statistics for your own listings
+• Earn coins and redeem them for discounts
+• German, English and Turkish
+
+
+<b>About the F-Droid build</b>
+
+This build contains no Google libraries. There are therefore no background notifications — new messages and calls appear while the app is open.
+
+Nimmdas is a client for the nimmdas.at service. An account there is required; the server side is not open source.

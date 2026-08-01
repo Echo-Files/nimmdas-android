@@ -1,15 +1,40 @@
-Nimmdas ist ein österreichischer Marktplatz für Gebrauchtes, Autos, Immobilien, Jobs und Dienstleistungen.
+Kaufen und verkaufen in Österreich — ohne Verkaufsgebühr, ohne Provision.
 
-Funktionen:
+Nimmdas ist ein Marktplatz für Gebrauchtes, Autos, Immobilien, Jobs und Dienstleistungen. Ein Inserat ist in unter einer Minute online: Titel eintippen, Fotos wählen, fertig.
 
-* Suche mit Kartenansicht, Umkreissuche und Filtern je Kategorie
-* Inserate in wenigen Schritten erstellen — die Kategorie wird aus dem Titel erkannt
-* Gebrauchtpreis-Check: Einordnung des Preises gegenüber dem aktuellen Neu- und Marktwert
-* Chat mit Bildern, PDFs, Standort und Preisvorschlägen
-* Sprachanrufe zwischen Käufer und Verkäufer
-* Merkliste und Suchagenten
-* Münz-System mit Rabatten auf Inserate
 
-Diese App ist ein Client für den Dienst nimmdas.at. Für die Nutzung wird ein dortiges Konto benötigt; der Serverteil ist nicht quelloffen.
+<b>Du weißt sofort, ob der Preis passt</b>
 
-Hinweis zur F-Droid-Version: Sie enthält keine Google-Bibliotheken. Push-Benachrichtigungen im Hintergrund sind deshalb nicht verfügbar — neue Nachrichten und Anrufe erscheinen, solange die App geöffnet ist.
+Bei jedem Inserat siehst du, wo der geforderte Preis steht — zwischen Super Deal und Über Neupreis. Bei Elektronik und Alltagsartikeln wird der aktuelle Neupreis herangezogen und mit dem Zustand verrechnet, bei Autos der Marktwert vergleichbarer Fahrzeuge. Kein Bauchgefühl, sondern eine Zahl.
+
+
+<b>Finden statt suchen</b>
+
+Die Karte zeigt alle Treffer auf einen Blick und fasst sie beim Herauszoomen zu Gruppen zusammen. Dazu Umkreissuche, Filter je Kategorie — Baujahr, Kilometer, Wohnfläche, Zimmer — und Suchagenten, die sich melden, sobald etwas Passendes neu online geht.
+
+
+<b>Inserieren, ohne Formulare auszufüllen</b>
+
+Tippe ein, was du verkaufst. Die passende Kategorie wird erkannt, Marke und Modell werden übernommen. Was noch fehlt, fragt die App gezielt ab — mit Vorschlägen statt leerer Felder. Noch nicht fertig? Als Entwurf speichern und später weitermachen.
+
+
+<b>Direkter Draht zum Verkäufer</b>
+
+Chat mit Bildern, PDFs, Standort und Preisvorschlägen, die sich mit einem Tipp annehmen oder ablehnen lassen. Wenn Schreiben zu langsam ist: direkt aus dem Chat anrufen.
+
+
+<b>Weitere Funktionen</b>
+
+• Merkliste für alles, was dir gefällt
+• Energieausweis und Dokumente bei Immobilien
+• 3D-Sonnenverlauf für Wohnungen und Häuser
+• Statistiken zu deinen Inseraten
+• Münzen sammeln und für Rabatte einlösen
+• Deutsch, Englisch und Türkisch
+
+
+<b>Zur F-Droid-Version</b>
+
+Diese Version enthält keine Google-Bibliotheken. Deshalb gibt es keine Benachrichtigungen im Hintergrund — neue Nachrichten und Anrufe siehst du, solange die App geöffnet ist.
+
+Nimmdas ist ein Client für den Dienst nimmdas.at. Ein Konto dort ist nötig; der Serverteil ist nicht quelloffen.
