@@ -1,0 +1,18 @@
+*.iml
+.gradle/
+/local.properties
+/.idea
+.DS_Store
+build/
+captures/
+.externalNativeBuild
+.cxx
+local.properties
+
+# Signing material — never commit
+*.jks
+*.keystore
+keystore.properties
+
+# Firebase project config for the Play build; not needed for the F-Droid flavor
+app/src/play/google-services.json

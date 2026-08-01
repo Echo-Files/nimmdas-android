@@ -1,0 +1,15 @@
+Nimmdas is an Austrian classifieds marketplace for second-hand goods, cars, real estate, jobs and services.
+
+Features:
+
+* Search with a map view, radius search and per-category filters
+* Create a listing in a few steps — the category is detected from the title
+* Used-price check: how the asking price compares to current new and market values
+* Chat with images, PDFs, location sharing and price offers
+* Voice calls between buyer and seller
+* Watchlist and search agents
+* Coin system with discounts on listings
+
+This app is a client for the nimmdas.at service. An account there is required; the server side is not open source.
+
+Note on the F-Droid build: it contains no Google libraries. Background push notifications are therefore unavailable — new messages and calls show up while the app is open.

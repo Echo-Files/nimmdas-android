@@ -1,0 +1,15 @@
+Nimmdas ist ein österreichischer Marktplatz für Gebrauchtes, Autos, Immobilien, Jobs und Dienstleistungen.
+
+Funktionen:
+
+* Suche mit Kartenansicht, Umkreissuche und Filtern je Kategorie
+* Inserate in wenigen Schritten erstellen — die Kategorie wird aus dem Titel erkannt
+* Gebrauchtpreis-Check: Einordnung des Preises gegenüber dem aktuellen Neu- und Marktwert
+* Chat mit Bildern, PDFs, Standort und Preisvorschlägen
+* Sprachanrufe zwischen Käufer und Verkäufer
+* Merkliste und Suchagenten
+* Münz-System mit Rabatten auf Inserate
+
+Diese App ist ein Client für den Dienst nimmdas.at. Für die Nutzung wird ein dortiges Konto benötigt; der Serverteil ist nicht quelloffen.
+
+Hinweis zur F-Droid-Version: Sie enthält keine Google-Bibliotheken. Push-Benachrichtigungen im Hintergrund sind deshalb nicht verfügbar — neue Nachrichten und Anrufe erscheinen, solange die App geöffnet ist.

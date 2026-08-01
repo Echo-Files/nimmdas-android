@@ -1,0 +1,132 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'at.nimmdas.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "at.nimmdas"
+        minSdk 26
+        targetSdk 35
+        versionCode 21
+        versionName "2.1.0"
+
+        buildConfigField "String", "API_BASE_URL", '"https://nimmdas.at"'
+    }
+
+    // Signing credentials come from keystore.properties, which is git-ignored.
+    // Without that file the release build is left unsigned — that is the normal case for
+    // F-Droid, which signs its own builds.
+    def keystorePropsFile = rootProject.file("keystore.properties")
+    def hasKeystore = keystorePropsFile.exists()
+    signingConfigs {
+        release {
+            if (hasKeystore) {
+                def keystoreProps = new Properties()
+                keystorePropsFile.withInputStream { keystoreProps.load(it) }
+                storeFile file(keystoreProps.getProperty("storeFile"))
+                storePassword keystoreProps.getProperty("storePassword")
+                keyAlias keystoreProps.getProperty("keyAlias")
+                keyPassword keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "API_BASE_URL", '"https://nimmdas.at"'
+        }
+        release {
+            if (hasKeystore) signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", '"https://nimmdas.at"'
+        }
+    }
+
+    // 'play' carries Firebase push; 'fdroid' is the fully free build F-Droid can compile.
+    flavorDimensions += "distribution"
+    productFlavors {
+        play {
+            dimension "distribution"
+        }
+        fdroid {
+            dimension "distribution"
+        }
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.10'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // Core
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+
+    // Compose BOM
+    implementation platform('androidx.compose:compose-bom:2024.02.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+
+    // Navigation
+    implementation 'androidx.navigation:navigation-compose:2.7.7'
+
+    // Networking
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Image Loading
+    implementation 'io.coil-kt:coil-compose:2.5.0'
+
+    // Maps — OpenStreetMap tiles, same source as the website
+    implementation 'org.osmdroid:osmdroid-android:6.1.18'
+
+    // ViewModel
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0'
+
+    // Google Sign-In (Credential Manager)
+
+    // Firebase
+    // Push — Play-Store build only. F-Droid rejects proprietary Google libraries.
+    playImplementation platform('com.google.firebase:firebase-bom:33.0.0')
+    playImplementation 'com.google.firebase:firebase-messaging'
+
+    // WebRTC for Voice Calling
+    implementation 'io.getstream:stream-webrtc-android:1.1.2'
+
+    // Debug
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+}
+
+// The Google Services plugin needs google-services.json and pulls in Google's toolchain,
+// so it must not run for the F-Droid variant.
+if (!gradle.startParameter.taskNames.toString().toLowerCase().contains("fdroid")) {
+    apply plugin: 'com.google.gms.google-services'
+}
