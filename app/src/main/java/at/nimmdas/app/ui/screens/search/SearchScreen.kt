@@ -645,8 +645,9 @@ fun SearchScreen(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(start = 4.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
+                    // No statusBarsPadding here: the Scaffold's content padding already
+                    // carries that inset, and applying it twice cost 62dp of blank space.
+                    .padding(start = 4.dp, end = 10.dp, top = 2.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(onClick = onBack) {
@@ -781,7 +782,7 @@ fun SearchScreen(
 
             // ── Category tabs
             LazyRow(
-                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(CATEGORIES) { (id, label) ->
@@ -961,7 +962,7 @@ fun SearchScreen(
             // Always shown in map mode: without it there is no way back to the list.
             if (totalResults > 0 || results.isNotEmpty() || viewMode == "map") {
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 6.dp),
+                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1168,7 +1169,7 @@ fun SearchScreen(
                 LazyVerticalGrid(
                     state = gridState,
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -1195,7 +1196,7 @@ fun SearchScreen(
                 )
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(results, key = { it.id }) { listing ->
