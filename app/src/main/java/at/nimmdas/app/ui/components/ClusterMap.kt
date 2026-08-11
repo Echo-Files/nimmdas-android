@@ -3,7 +3,22 @@ package at.nimmdas.app.ui.components
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
@@ -54,8 +69,9 @@ fun ClusterMap(
         osmdroidTileCache = context.cacheDir.resolve("osmdroid")
     }
 
+    Box(modifier.fillMaxSize()) {
     AndroidView(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
             MapView(ctx).apply {
                 mapRef.value = this
@@ -77,7 +93,45 @@ fun ClusterMap(
         update = { map -> rebuildClusters(map, pins, onPinClick) },
     )
 
+        // osmdroid's built-in zoom buttons are hidden because they look like Android 4.
+        // Pinching alone is awkward one-handed, so these sit where a thumb reaches.
+        Column(
+            Modifier.align(Alignment.CenterEnd).padding(end = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            MapButton(Icons.Filled.Add, "Vergrößern") {
+                mapRef.value?.controller?.zoomIn()
+            }
+            MapButton(Icons.Filled.Remove, "Verkleinern") {
+                mapRef.value?.controller?.zoomOut()
+            }
+            MapButton(Icons.Filled.CenterFocusStrong, "Auf Österreich zentrieren") {
+                mapRef.value?.controller?.animateTo(GeoPoint(47.6, 13.5), 7.0, 500L)
+            }
+        }
+    }
+
     DisposableEffect(Unit) { onDispose { runCatching { mapRef.value?.onDetach() } } }
+}
+
+/** Round map control with a soft shadow so it stays legible over any tile. */
+@Composable
+private fun MapButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(0.95f),
+        shadowElevation = 4.dp,
+        modifier = Modifier.size(42.dp),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(icon, label, Modifier.size(21.dp), tint = MaterialTheme.colorScheme.onSurface)
+        }
+    }
 }
 
 /**

@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -366,6 +367,25 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
+/** Borderless round icon button used next to the result count. */
+@Composable
+private fun GhostIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = Color.Transparent,
+        modifier = Modifier.size(34.dp),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(icon, label, Modifier.size(19.dp), tint = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
 /** Results fetched per page while scrolling. The server caps this at 50. */
 private const val PAGE_SIZE = 30
 
@@ -618,10 +638,21 @@ fun SearchScreen(
                 }
         ) {
             // ── Search bar
-            TopAppBar(
-                title = {
-                    // Pill-shaped field on a soft surface: one clear tap target, no
-                    // competing outlines, and the clear button only when it's useful.
+            // A TopAppBar squeezed the field between a back arrow and three actions,
+            // leaving room for barely a word. Only the filter — which changes the query —
+            // stays up here; "Auf gut Glück" and the search agent moved down to the
+            // results row, where they belong.
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(start = 4.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zurück")
+                }
+                Box(Modifier.weight(1f)) {
                     TextField(
                         value = query, onValueChange = { searchViewModel.setQuery(it) },
                         placeholder = {
@@ -654,27 +685,27 @@ fun SearchScreen(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { searchViewModel.searchWithNlp() })
                     )
-                },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zurück") } },
-                actions = {
-                    IconButton(onClick = {
-                        searchViewModel.lucky(
-                            onFound = { id -> searchViewModel.dismissPreview(); onListingClick(id) },
-                            onNone = { luckyEmpty = true },
-                        )
-                    }) {
-                        Icon(Icons.Filled.Casino, "Auf gut Glück", tint = Color(0xFF00BC7D))
-                    }
-                    IconButton(onClick = { showSavedSearchDialog = true }) {
-                        Icon(Icons.Filled.Notifications, "Suchagent erstellen", tint = Color(0xFF00BC7D))
-                    }
-                    BadgedBox(badge = { if (activeCount > 0) Badge { Text("$activeCount") } }) {
-                        IconButton(onClick = { showFilters = !showFilters }) {
-                            Icon(Icons.Filled.Tune, "Filter", tint = if (showFilters) Color(0xFF00BC7D) else MaterialTheme.colorScheme.onSurface)
+                }
+                Spacer(Modifier.width(6.dp))
+                // Filled once filters are active, so the state is visible without counting.
+                BadgedBox(badge = { if (activeCount > 0) Badge { Text("$activeCount") } }) {
+                    Surface(
+                        onClick = { showFilters = !showFilters },
+                        shape = CircleShape,
+                        color = if (activeCount > 0) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(0.6f),
+                        modifier = Modifier.size(46.dp),
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Filled.Tune, "Filter", Modifier.size(21.dp),
+                                tint = if (activeCount > 0) Color.White
+                                       else MaterialTheme.colorScheme.onSurface.copy(0.75f),
+                            )
                         }
                     }
                 }
-            )
+            }
 
             // ── Live preview while typing
             if (showPreview && previewItems.isNotEmpty()) {
@@ -749,14 +780,33 @@ fun SearchScreen(
             }
 
             // ── Category tabs
-            LazyRow(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 items(CATEGORIES) { (id, label) ->
-                    FilterChip(
-                        selected = if (id == "all") selectedCategory == null else selectedCategory == id,
+                    val selected = if (id == "all") selectedCategory == null else selectedCategory == id
+                    // Selected reads as a solid brand pill; unselected is a quiet outline.
+                    // The old chips were all near-identical white, so the active one was
+                    // easy to miss.
+                    Surface(
                         onClick = { searchViewModel.setCategory(if (id == "all") null else id) },
-                        label = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1) },
-                        shape = RoundedCornerShape(12.dp) // Large rounded category bento tabs!
-                    )
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (selected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surface,
+                        border = if (selected) null
+                                 else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        shadowElevation = if (selected) 2.dp else 0.dp,
+                    ) {
+                        Text(
+                            label,
+                            Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
 
@@ -915,11 +965,27 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        if (totalResults > 0) "$totalResults Ergebnisse" else "",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(0.5f)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            if (totalResults > 0) "$totalResults Treffer" else "",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        // These act on the result set, so they live with it rather than
+                        // crowding the search field.
+                        GhostIconButton(Icons.Filled.Casino, "Auf gut Glück") {
+                            searchViewModel.lucky(
+                                onFound = { id -> searchViewModel.dismissPreview(); onListingClick(id) },
+                                onNone = { luckyEmpty = true },
+                            )
+                        }
+                        GhostIconButton(Icons.Filled.NotificationsActive, "Suchagent erstellen") {
+                            showSavedSearchDialog = true
+                        }
+                    }
                     // View toggle: Grid / List
                     Row(
                         Modifier

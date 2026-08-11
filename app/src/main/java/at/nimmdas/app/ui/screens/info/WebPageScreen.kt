@@ -31,6 +31,10 @@ fun WebPageScreen(
     title: String,
     onBack: () -> Unit
 ) {
+    // Pinch-zooming the document fights the 3D simulator's own camera controls, so it is
+    // disabled for that page while text pages keep it.
+    val allowZoom = !url.contains("/shadowmap")
+
     val context = LocalContext.current
     val app = context.applicationContext as NimmdasApp
     val scope = rememberCoroutineScope()
@@ -132,8 +136,8 @@ fun WebPageScreen(
                                 domStorageEnabled = true
                                 useWideViewPort = true
                                 loadWithOverviewMode = true
-                                supportZoom()
-                                builtInZoomControls = true
+                                setSupportZoom(allowZoom)
+                                builtInZoomControls = allowZoom
                                 displayZoomControls = false
                             }
 

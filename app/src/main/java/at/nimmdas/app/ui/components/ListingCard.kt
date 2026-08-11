@@ -137,13 +137,15 @@ fun ListingCard(
     ) {
         if (isList) {
             // ═══ LIST / ROW VIEW ═══
-            Row(Modifier.height(IntrinsicSize.Min)) {
+            // Fixed image box instead of fillMaxHeight: a listing with little text made
+            // the photo squat while a long title stretched it tall, so no two rows in the
+            // list matched.
+            Row(Modifier.height(IntrinsicSize.Min).padding(10.dp)) {
                 // Image (left)
                 Box(
                     Modifier
-                        .width(130.dp)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp))
+                        .size(118.dp)
+                        .clip(RoundedCornerShape(14.dp))
                 ) {
                     if (imageUrl != null) {
                         AsyncImage(
@@ -158,11 +160,8 @@ fun ListingCard(
                             contentAlignment = Alignment.Center
                         ) { Text("📷", fontSize = 28.sp) }
                     }
-                    // Save toggle
-                    if (isSaved != null && onToggleSave != null) {
-                        SaveHeart(isSaved, onToggleSave, Modifier.align(Alignment.TopEnd).padding(6.dp))
-                    }
-                    // Badges
+                    // The heart moved next to the title — on a 118dp thumbnail it fought
+                    // with the status badge for the same corner.
                     Column(Modifier.align(Alignment.TopStart).padding(6.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         if (isBoosted) SmallBadge("⚡ Top", Color(0xFFD97706))
                         if (isNew && !isBoosted) SmallBadge("Neu", Color(0xFF10B981))
@@ -182,12 +181,22 @@ fun ListingCard(
                 }
 
                 // Content (right)
-                Column(Modifier.weight(1f).padding(12.dp).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
+                Column(
+                    Modifier.weight(1f).padding(start = 12.dp, end = 4.dp).fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
                     Column {
                         // Title
-                        Text(listing.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
-                            maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface)
+                        Row(verticalAlignment = Alignment.Top) {
+                            Text(listing.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                                maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f))
+                            if (isSaved != null && onToggleSave != null) {
+                                Spacer(Modifier.width(4.dp))
+                                PlainHeart(isSaved, onToggleSave)
+                            }
+                        }
                         Spacer(Modifier.height(4.dp))
                         // Price + condition
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -426,6 +435,22 @@ private fun AgencyRow(seller: SellerInfo) {
             modifier = Modifier.weight(1f, fill = false),
         )
         if (seller.verified == true) Text("✅", fontSize = 9.sp)
+    }
+}
+
+/** Heart for the list view, where it sits on the card surface rather than a photo. */
+@Composable
+private fun PlainHeart(isSaved: Boolean, onToggle: () -> Unit) {
+    Box(
+        Modifier.size(30.dp).clip(CircleShape).clickable(onClick = onToggle),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            if (isSaved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            contentDescription = if (isSaved) "Gemerkt" else "Merken",
+            modifier = Modifier.size(19.dp),
+            tint = if (isSaved) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurface.copy(0.35f),
+        )
     }
 }
 
