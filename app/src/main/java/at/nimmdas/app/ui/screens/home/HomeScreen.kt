@@ -46,6 +46,8 @@ fun HomeScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background)
+            // No TopAppBar on this screen, so it carries the status-bar inset itself.
+            .statusBarsPadding()
     ) {
         // ── Hero Section with green gradient ──────
         Box(
@@ -269,7 +271,8 @@ fun HomeScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Clears the floating nav capsule the content now scrolls behind.
+        Spacer(modifier = Modifier.height(at.nimmdas.app.navigation.BottomBarSpace))
     }
 }
 

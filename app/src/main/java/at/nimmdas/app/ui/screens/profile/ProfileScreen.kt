@@ -176,6 +176,8 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
+            // No TopAppBar here, so this screen carries the status-bar inset itself.
+            .statusBarsPadding()
     ) {
         if (isLoading && user == null) {
             Box(modifier = Modifier.fillMaxSize().padding(60.dp), contentAlignment = Alignment.Center) {
@@ -573,7 +575,8 @@ fun ProfileScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        // Clears the floating nav capsule the content now scrolls behind.
+        Spacer(Modifier.height(at.nimmdas.app.navigation.BottomBarSpace))
     }
 
     if (showLangDialog) {

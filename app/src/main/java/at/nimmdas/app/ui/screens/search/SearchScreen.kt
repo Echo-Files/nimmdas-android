@@ -645,8 +645,6 @@ fun SearchScreen(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    // No statusBarsPadding here: the Scaffold's content padding already
-                    // carries that inset, and applying it twice cost 62dp of blank space.
                     .padding(start = 4.dp, end = 10.dp, top = 2.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -973,6 +971,8 @@ fun SearchScreen(
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Spacer(Modifier.width(4.dp))
                         // These act on the result set, so they live with it rather than
@@ -987,7 +987,9 @@ fun SearchScreen(
                             showSavedSearchDialog = true
                         }
                     }
-                    // View toggle: Grid / List
+                    // View toggle: only the active mode carries its label — with the
+                    // result count and the two result actions in the same row, three
+                    // labelled segments no longer fit and "Karte" was being clipped.
                     Row(
                         Modifier
                             .clip(RoundedCornerShape(50))
@@ -995,40 +997,37 @@ fun SearchScreen(
                             .padding(2.dp),
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        Surface(
-                            onClick = { viewMode = "grid" },
-                            shape = RoundedCornerShape(50),
-                            color = if (viewMode == "grid") MaterialTheme.colorScheme.surface else Color.Transparent,
-                            shadowElevation = if (viewMode == "grid") 1.dp else 0.dp
-                        ) {
-                            Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Icon(Icons.Filled.GridView, null, Modifier.size(14.dp), tint = if (viewMode == "grid") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
-                                Text("Kacheln", fontSize = 11.sp, fontWeight = if (viewMode == "grid") FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (viewMode == "grid") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
-                            }
-                        }
-                        Surface(
-                            onClick = { viewMode = "list" },
-                            shape = RoundedCornerShape(50),
-                            color = if (viewMode == "list") MaterialTheme.colorScheme.surface else Color.Transparent,
-                            shadowElevation = if (viewMode == "list") 1.dp else 0.dp
-                        ) {
-                            Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Icon(Icons.AutoMirrored.Filled.ViewList, null, Modifier.size(14.dp), tint = if (viewMode == "list") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
-                                Text("Liste", fontSize = 11.sp, fontWeight = if (viewMode == "list") FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (viewMode == "list") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
-                            }
-                        }
-                        Surface(
-                            onClick = { viewMode = "map"; searchViewModel.loadMapPins() },
-                            shape = RoundedCornerShape(50),
-                            color = if (viewMode == "map") MaterialTheme.colorScheme.surface else Color.Transparent,
-                            shadowElevation = if (viewMode == "map") 1.dp else 0.dp
-                        ) {
-                            Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Icon(Icons.Filled.Map, null, Modifier.size(14.dp), tint = if (viewMode == "map") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
-                                Text("Karte", fontSize = 11.sp, fontWeight = if (viewMode == "map") FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (viewMode == "map") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(0.4f))
+                        listOf(
+                            Triple("grid", Icons.Filled.GridView, "Kacheln"),
+                            Triple("list", Icons.AutoMirrored.Filled.ViewList, "Liste"),
+                            Triple("map", Icons.Filled.Map, "Karte"),
+                        ).forEach { (mode, icon, label) ->
+                            val active = viewMode == mode
+                            Surface(
+                                onClick = {
+                                    viewMode = mode
+                                    if (mode == "map") searchViewModel.loadMapPins()
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = if (active) MaterialTheme.colorScheme.surface else Color.Transparent,
+                                shadowElevation = if (active) 1.dp else 0.dp,
+                            ) {
+                                Row(
+                                    Modifier.padding(horizontal = if (active) 12.dp else 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                ) {
+                                    Icon(
+                                        icon, label, Modifier.size(16.dp),
+                                        tint = if (active) MaterialTheme.colorScheme.onSurface
+                                               else MaterialTheme.colorScheme.onSurface.copy(0.45f),
+                                    )
+                                    if (active) {
+                                        Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface)
+                                    }
+                                }
                             }
                         }
                     }
@@ -1169,7 +1168,8 @@ fun SearchScreen(
                 LazyVerticalGrid(
                     state = gridState,
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp,
+                        bottom = at.nimmdas.app.navigation.BottomBarSpace),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -1196,7 +1196,8 @@ fun SearchScreen(
                 )
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp,
+                        bottom = at.nimmdas.app.navigation.BottomBarSpace),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(results, key = { it.id }) { listing ->

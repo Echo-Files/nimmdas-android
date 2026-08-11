@@ -110,6 +110,9 @@ data class BottomNavItem(
     val unselectedIcon: ImageVector
 )
 
+/** Height the floating nav capsule covers — scrollable screens pad by this at the end. */
+val BottomBarSpace = 104.dp
+
 val bottomNavItems = listOf(
     BottomNavItem(Screen.Home, "Home", Icons.Filled.Home, Icons.Outlined.Home),
     BottomNavItem(Screen.Search, "Suche", Icons.Filled.Search, Icons.Outlined.Search),
@@ -254,6 +257,10 @@ fun AppNavigation(
     )
 
     Scaffold(
+        // Every screen either brings its own TopAppBar or pads itself. Letting this
+        // Scaffold apply the status-bar inset as well meant screens with a top bar paid
+        // it twice — 76dp of blank white above the listing title, for one.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 // Floating capsule bottom nav — matching website design
@@ -378,7 +385,10 @@ fun AppNavigation(
         NavHost(
             navController = navController,
             startDestination = startDestination!!,
-            modifier = Modifier.padding(innerPadding)
+            // Only the top inset. The nav capsule floats and is translucent, so content
+            // should scroll behind it instead of stopping at a hard edge above it —
+            // each scrollable screen appends BottomBarSpace so the last item still clears.
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(

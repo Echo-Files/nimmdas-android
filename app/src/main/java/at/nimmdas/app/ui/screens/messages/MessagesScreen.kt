@@ -66,7 +66,13 @@ fun MessagesScreen(
     val threads by viewModel.threads.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            // No TopAppBar here, so this screen carries the status-bar inset itself.
+            .statusBarsPadding()
+    ) {
         TopAppBar(
             title = { Text("Nachrichten", fontWeight = FontWeight.Bold) },
         )
@@ -90,7 +96,10 @@ fun MessagesScreen(
             }
         } else {
             LazyColumn(
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                contentPadding = PaddingValues(
+                    start = 12.dp, end = 12.dp, top = 4.dp,
+                    bottom = at.nimmdas.app.navigation.BottomBarSpace,
+                ),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(threads) { thread ->
