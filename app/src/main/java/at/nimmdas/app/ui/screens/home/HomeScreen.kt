@@ -192,8 +192,13 @@ fun HomeScreen(
 
         // ── Listing Sections ──────────────────────
         if (isLoading && listings.isEmpty()) {
-            Box(modifier = Modifier.fillMaxWidth().padding(60.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 3.dp)
+            // Skeletons in the shape of the carousels — the page no longer jumps once
+            // the data lands.
+            repeat(2) {
+                Box(Modifier.padding(start = 16.dp, top = 14.dp, bottom = 8.dp)) {
+                    at.nimmdas.app.ui.components.SkeletonBox(Modifier.width(150.dp).height(22.dp), corner = 6)
+                }
+                at.nimmdas.app.ui.components.SkeletonRow()
             }
         } else {
             // Group by categories
@@ -209,6 +214,10 @@ fun HomeScreen(
                         onListingClick = onListingClick,
                         savedIds = savedIds,
                         onToggleSave = { app.watchlist.toggle(it) },
+                        onSeeAll = {
+                            at.nimmdas.app.ui.screens.search.PendingSearch.requestCategory(category)
+                            onSearchClick()
+                        },
                     )
                 }
             }
@@ -220,6 +229,7 @@ fun HomeScreen(
                 onListingClick = onListingClick,
                 savedIds = savedIds,
                 onToggleSave = { app.watchlist.toggle(it) },
+                onSeeAll = onSearchClick,
             )
 
             // Call to action
@@ -270,13 +280,38 @@ fun ListingSection(
     onListingClick: (String) -> Unit,
     savedIds: Set<String> = emptySet(),
     onToggleSave: (String) -> Unit = {},
+    /** Opens the search prefiltered to this section; null hides the "Alle" chip. */
+    onSeeAll: (() -> Unit)? = null,
 ) {
     Column(modifier = Modifier.padding(vertical = 6.dp)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+        Row(
+            Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.weight(1f),
+            )
+            // Nothing previously hinted that a section continues past the screen edge.
+            onSeeAll?.let {
+                Surface(
+                    onClick = it,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary.copy(0.08f),
+                ) {
+                    Row(
+                        Modifier.padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Alle", fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Filled.ChevronRight, null, Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)

@@ -1049,7 +1049,7 @@ fun SearchScreen(
 
             // ── Results
             if (isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Color(0xFF00BC7D), strokeWidth = 3.dp) }
+                at.nimmdas.app.ui.components.SkeletonList()
             } else if (results.isEmpty() && (query.isNotBlank() || selectedCategory != null || filters.isNotEmpty())) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(

@@ -7,9 +7,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.draw.scale
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -237,7 +242,10 @@ fun ListingCard(
                             }
                         }
                         listing.createdAt?.let {
-                            Text(timeAgo(it), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.3f))
+                            // Without the gap a long place name runs straight into the age.
+                            Spacer(Modifier.width(8.dp))
+                            Text(timeAgo(it), fontSize = 11.sp, maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSurface.copy(0.3f))
                         }
                     }
                 }
@@ -326,7 +334,10 @@ fun ListingCard(
                             }
                         }
                         listing.createdAt?.let {
-                            Text(timeAgo(it), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.3f))
+                            // Without the gap a long place name runs straight into the age.
+                            Spacer(Modifier.width(8.dp))
+                            Text(timeAgo(it), fontSize = 11.sp, maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSurface.copy(0.3f))
                         }
                     }
                 }
@@ -418,19 +429,34 @@ private fun AgencyRow(seller: SellerInfo) {
     }
 }
 
-/** Small translucent heart button overlaid on a card's image. */
+/**
+ * Heart button overlaid on a card's image.
+ *
+ * A translucent scrim reads differently over every photo, so once saved the chip turns
+ * solid white — that way the state is legible no matter what is behind it. The icon
+ * springs slightly when toggled.
+ */
 @Composable
 private fun SaveHeart(isSaved: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    val scale by animateFloatAsState(
+        targetValue = if (isSaved) 1.12f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "heartScale",
+    )
     Surface(
-        modifier.size(30.dp).clickable(onClick = onToggle),
+        modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onToggle),
         shape = CircleShape,
-        color = Color.Black.copy(0.32f),
+        color = if (isSaved) Color.White else Color.Black.copy(0.38f),
+        shadowElevation = if (isSaved) 3.dp else 0.dp,
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Icon(
                 if (isSaved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = if (isSaved) "Gemerkt" else "Merken",
-                modifier = Modifier.size(17.dp),
+                modifier = Modifier.size(18.dp).scale(scale),
                 tint = if (isSaved) Color(0xFFEF4444) else Color.White,
             )
         }

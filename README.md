@@ -39,3 +39,7 @@ Without that file the release build stays unsigned, which is what F-Droid needs.
 ## License
 
 GNU General Public License v3.0 or later — see [LICENSE](LICENSE).
+
+Bundled fonts are [Inter](https://github.com/rsms/inter) by The Inter Project Authors,
+under the SIL Open Font License 1.1 — see [third_party/Inter-OFL.txt](third_party/Inter-OFL.txt).
+They are subset to Latin and Latin Extended-A.
